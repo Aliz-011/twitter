@@ -21,4 +21,12 @@ export type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const postSchema = z.object({
   content: z.string().trim().min(1),
+  mediaIds: z.array(z.string()).max(4),
 });
+
+export const updateUserSchema = z.object({
+  displayName: z.string().trim().min(1),
+  bio: z.string().max(1000).optional(),
+});
+
+export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;

@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
       orderBy: {
         createdAt: 'desc',
       },
-      take: pageSize,
+      take: pageSize + 1,
       cursor: cursor ? { id: cursor } : undefined,
       include: getPostDataInclude(user.id),
     });

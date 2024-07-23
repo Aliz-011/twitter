@@ -3,23 +3,29 @@
 import { validateRequest } from '@/auth';
 import { client } from '@/lib/database';
 import { postSchema } from '@/lib/validation';
-import { postDataInclude } from '@/types';
+import { getPostDataInclude } from '@/types';
 
-export const createPost = async (value: string) => {
+export const createPost = async (values: {
+  content: string;
+  mediaIds: string[];
+}) => {
   const { user } = await validateRequest();
 
   if (!user) {
     throw new Error('Unauthorized');
   }
 
-  const { content } = postSchema.parse({ content: value });
+  const { content, mediaIds } = postSchema.parse(values);
 
   const newPost = await client.post.create({
     data: {
-      userId: user.id,
       content,
+      userId: user.id,
+      attachments: {
+        connect: mediaIds.map((id) => ({ id })),
+      },
     },
-    include: postDataInclude,
+    include: getPostDataInclude(user.id),
   });
 
   return newPost;
@@ -44,7 +50,7 @@ export const deletePost = async (id: string) => {
 
   const deletedPost = await client.post.delete({
     where: { id },
-    include: postDataInclude,
+    include: getPostDataInclude(user.id),
   });
 
   return deletedPost;

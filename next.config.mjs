@@ -8,6 +8,12 @@ const nextConfig = {
       {
         hostname: 'imageplaceholder.net',
       },
+
+      {
+        protocol: 'https',
+        hostname: 'utfs.io',
+        pathname: `/a/${process.env.UPLOADTHING_APP_ID}/*`,
+      },
     ],
   },
 };

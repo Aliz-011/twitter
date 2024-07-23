@@ -12,8 +12,11 @@ import {
   loginSchema,
   RegisterFormValues,
   registerSchema,
+  UpdateUserFormValues,
+  updateUserSchema,
 } from '@/lib/validation';
 import { lucia, validateRequest } from '../auth';
+import { getUserDataSelect } from '@/types';
 
 export const register = async (credentials: RegisterFormValues) => {
   try {
@@ -178,4 +181,32 @@ export const logout = async () => {
   );
 
   return redirect('/sign-in');
+};
+
+export const updateUser = async (values: UpdateUserFormValues) => {
+  const validatedFields = updateUserSchema.safeParse(values);
+
+  if (!validatedFields.success) {
+    throw new Error('Invalidate fields');
+  }
+
+  const body = validatedFields.data;
+
+  const { user } = await validateRequest();
+
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  const updateUser = await client.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      ...body,
+    },
+    select: getUserDataSelect(user.id),
+  });
+
+  return updateUser;
 };

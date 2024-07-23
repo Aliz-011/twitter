@@ -10,7 +10,7 @@ export async function GET(
     const { user: loggedInUser } = await validateRequest();
 
     if (!loggedInUser) {
-      return Response.json({ error: 'Unauthorized' });
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await client.user.findUnique({

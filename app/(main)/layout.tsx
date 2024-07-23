@@ -16,7 +16,7 @@ const MainLayout = async ({ children }: { children: React.ReactNode }) => {
     <SessionProvider value={session}>
       <div className="flex min-h-screen flex-col">
         <Navbar />
-        <div className="max-w-7xl mx-auto p-5 flex w-full grow gap-5">
+        <div className="max-w-screen-xl mx-auto p-5 flex w-full grow gap-5">
           <MenuBar className="sticky top-[5.25rem] h-fit hidden sm:block flex-none space-y-3 border rounded-xl bg-card px-3 py-5 lg:px-5 shadow-sm xl:w-80" />
           {children}
         </div>

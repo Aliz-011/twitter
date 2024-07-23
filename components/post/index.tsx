@@ -1,19 +1,15 @@
 import Link from 'next/link';
 
 import { UserAvatar } from '@/components/user-avatar';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/components/ui/hover-card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FollowButton } from '@/components/follow-button';
-import { FollowerCount } from '@/components/follower-count';
+import { Linkify } from '@/components/linkify';
+import { UserTooltip } from '@/components/user-tooltip';
 import { MoreButton } from './more-button';
 
 import { PostData } from '@/types';
-import { formatRelativeDate } from '@/lib/utils';
+import { cn, formatRelativeDate } from '@/lib/utils';
 import { useSession } from '@/hooks/use-session';
+import { MediaPreview } from './media-preview';
 
 type Props = {
   post: PostData;
@@ -22,71 +18,28 @@ type Props = {
 export const Post = ({ post }: Props) => {
   const { user } = useSession();
 
-  const followerInfo = {
-    followers: post.user._count.followers,
-    isFollowedByUser: post.user.followers.some(
-      ({ followerId }) => followerId === user.id
-    ),
-  };
-
   return (
     <article className="group/post space-y-3 rounded-xl bg-card border p-5 shadow-sm">
       <div className="flex justify-between gap-3">
         <div className="flex flex-wrap gap-3">
-          <Link href={`/${post.user.username}`} className="flex items-center">
-            <UserAvatar avatarUrl={post.user.avatarUrl} className="flex-none" />
-          </Link>
+          <UserTooltip user={post.user}>
+            <Link href={`/${post.user.username}`} className="flex items-center">
+              <UserAvatar
+                avatarUrl={post.user.avatarUrl}
+                className="flex-none"
+              />
+            </Link>
+          </UserTooltip>
 
           <div>
-            <HoverCard>
-              <HoverCardTrigger asChild>
-                <Link
-                  href={`/${post.user.username}`}
-                  className="font-medium hover:underline block"
-                >
-                  {post.user.displayName}
-                </Link>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-80">
-                <div className="flex justify-between space-x-4 space-y-2">
-                  <UserAvatar
-                    avatarUrl={post.user.avatarUrl}
-                    className="size-16"
-                  />
-                  {user.id === post.user.id ? undefined : (
-                    <FollowButton
-                      initialState={followerInfo}
-                      userId={user.id}
-                    />
-                  )}
-                </div>
-
-                <div>
-                  <Link
-                    href={`/${post.user.username}`}
-                    className="hover:underline"
-                  >
-                    <h4 className="text-xl font-semibold">
-                      {post.user.displayName}
-                    </h4>
-                  </Link>
-                  <Link href={`/${post.user.username}`}>
-                    <p className="text-muted-foreground">@{user.username}</p>
-                  </Link>
-                  {post.user.bio && <p className="text-sm">{post.user.bio}</p>}
-                  <div className="flex items-center gap-x-4 pt-2">
-                    <p className="font-semibold text-sm">
-                      2&nbsp;<span className="font-normal">Following</span>
-                    </p>
-                    <FollowerCount
-                      initialState={followerInfo}
-                      userId={user.id}
-                      className="text-sm"
-                    />
-                  </div>
-                </div>
-              </HoverCardContent>
-            </HoverCard>
+            <UserTooltip user={post.user}>
+              <Link
+                href={`/${post.user.username}`}
+                className="font-medium hover:underline block"
+              >
+                {post.user.displayName}
+              </Link>
+            </UserTooltip>
 
             <Link
               href={`/posts/${post.id}`}
@@ -104,7 +57,20 @@ export const Post = ({ post }: Props) => {
           />
         )}
       </div>
-      <div className="whitespace-pre-line break-words">{post.content}</div>
+      <Linkify>
+        <div className="whitespace-pre-line break-words">{post.content}</div>
+      </Linkify>
+      <div
+        className={cn(
+          'flex flex-col gap-3',
+          post.attachments.length > 1 && 'sm:grid sm:grid-cols-2'
+        )}
+      >
+        {!!post.attachments.length &&
+          post.attachments.map((att) => (
+            <MediaPreview key={att.id} media={att} />
+          ))}
+      </div>
     </article>
   );
 };

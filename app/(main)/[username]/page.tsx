@@ -4,13 +4,14 @@ import { CalendarDays } from 'lucide-react';
 import { FollowerCount } from '@/components/follower-count';
 import { TrendsSidebar } from '@/components/trends-sidebar';
 import { UserAvatar } from '@/components/user-avatar';
-import { Button } from '@/components/ui/button';
 import { FollowButton } from '@/components/follow-button';
+import { Linkify } from '@/components/linkify';
 import { UserPosts } from './user-posts';
 
 import { validateRequest } from '@/auth';
 import { getUser } from '@/lib/queries';
 import { formatNumber } from '@/lib/utils';
+import { EditProfileButton } from './edit-profile-button';
 
 export const generateMetadata = async ({
   params: { username },
@@ -68,6 +69,15 @@ const UserPage = async ({
                 <h1 className="text-3xl font-bold">{user.displayName}</h1>
                 <p className="text-muted-foreground">@{user.username}</p>
               </div>
+              {user.bio && (
+                <>
+                  <Linkify>
+                    <div className="whitespace-pre-line overflow-hidden break-words">
+                      {user.bio}
+                    </div>
+                  </Linkify>
+                </>
+              )}
               <div className="text-muted-foreground font-medium text-sm flex items-center">
                 <CalendarDays className="size-5 mr-2" />
                 Joined {formatDate(user.createdAt, 'MMM yyyy')}
@@ -85,25 +95,10 @@ const UserPage = async ({
             </div>
 
             {user.id === loggedInUser.id ? (
-              <Button className="rounded-full">Edit profile</Button>
+              <EditProfileButton user={user} />
             ) : (
               <FollowButton initialState={followerInfo} userId={user.id} />
             )}
-          </div>
-
-          {user.bio && (
-            <>
-              <hr />
-              <div className="whitespace-pre-line overflow-hidden break-words">
-                {user.bio}
-              </div>
-            </>
-          )}
-
-          <div className="rounded-xl bg-card shadow-sm p-5 border">
-            <h2 className="text-center text-2xl font-bold">
-              {user.displayName}&apos; posts
-            </h2>
           </div>
         </div>
         <UserPosts userId={user.id} />

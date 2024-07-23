@@ -18,7 +18,7 @@ export const UserAvatar = ({
       )}
     >
       <AvatarImage
-        src={avatarUrl ? avatarUrl : 'https://github.com/shadcn.png'}
+        src={avatarUrl || 'https://github.com/shadcn.png'}
         sizes={sizes}
       />
       <AvatarFallback>CN</AvatarFallback>

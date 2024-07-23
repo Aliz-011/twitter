@@ -10,6 +10,7 @@ import { client } from '@/lib/database';
 import { getTrendingTropics } from '@/lib/queries';
 import { formatNumber } from '@/lib/utils';
 import { getUserDataSelect } from '@/types';
+import { UserTooltip } from './user-tooltip';
 
 export const TrendsSidebar = () => {
   return (
@@ -56,18 +57,23 @@ const WhoToFollow = async () => {
       <h2 className="text-xl font-bold">Who to follow</h2>
       {usersToFollow.map((user) => (
         <div key={user.id} className="flex items-center justify-between gap-3">
-          <Link href={`/${user.username}`} className="flex items-center gap-3">
-            <UserAvatar avatarUrl={user.avatarUrl} className="flex-none" />
+          <UserTooltip user={user}>
+            <Link
+              href={`/${user.username}`}
+              className="flex items-center gap-3"
+            >
+              <UserAvatar avatarUrl={user.avatarUrl} className="flex-none" />
 
-            <div>
-              <p className="line-clamp-1 break-all font-semibold hover:underline">
-                {user.displayName}
-              </p>
-              <p className="line-clamp-1 break-all text-muted-foreground text-sm">
-                @{user.username}
-              </p>
-            </div>
-          </Link>
+              <div>
+                <p className="line-clamp-1 break-all font-semibold hover:underline">
+                  {user.displayName}
+                </p>
+                <p className="line-clamp-1 break-all text-muted-foreground text-sm">
+                  @{user.username}
+                </p>
+              </div>
+            </Link>
+          </UserTooltip>
 
           <FollowButton
             userId={user.id}
