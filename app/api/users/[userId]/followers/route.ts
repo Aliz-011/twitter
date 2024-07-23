@@ -61,19 +61,28 @@ export async function POST(
       return Response.json({ error: 'Unauthorized' });
     }
 
-    await client.follow.upsert({
-      where: {
-        followerId_followingId: {
+    await client.$transaction([
+      client.follow.upsert({
+        where: {
+          followerId_followingId: {
+            followerId: loggedInUser.id,
+            followingId: userId,
+          },
+        },
+        create: {
           followerId: loggedInUser.id,
           followingId: userId,
         },
-      },
-      create: {
-        followerId: loggedInUser.id,
-        followingId: userId,
-      },
-      update: {},
-    });
+        update: {},
+      }),
+      client.notification.create({
+        data: {
+          issuerId: loggedInUser.id,
+          recipientId: userId,
+          type: 'FOLLOW',
+        },
+      }),
+    ]);
 
     return new Response();
   } catch (error) {
@@ -93,12 +102,21 @@ export async function DELETE(
       return Response.json({ error: 'Unauthorized' });
     }
 
-    await client.follow.deleteMany({
-      where: {
-        followerId: loggedInUser.id,
-        followingId: userId,
-      },
-    });
+    await client.$transaction([
+      client.follow.deleteMany({
+        where: {
+          followerId: loggedInUser.id,
+          followingId: userId,
+        },
+      }),
+      client.notification.deleteMany({
+        where: {
+          issuerId: loggedInUser.id,
+          recipientId: userId,
+          type: 'FOLLOW',
+        },
+      }),
+    ]);
 
     return new Response();
   } catch (error) {

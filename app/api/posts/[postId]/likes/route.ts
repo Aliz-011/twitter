@@ -60,19 +60,46 @@ export async function POST(
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await client.like.upsert({
+    const post = await client.post.findUnique({
       where: {
-        userId_postId: {
+        id: params.postId,
+      },
+      select: {
+        userId: true,
+      },
+    });
+
+    if (!post) {
+      return Response.json({ error: 'Post not found' }, { status: 404 });
+    }
+
+    await client.$transaction([
+      client.like.upsert({
+        where: {
+          userId_postId: {
+            userId: loggedInUser.id,
+            postId: params.postId,
+          },
+        },
+        create: {
           userId: loggedInUser.id,
           postId: params.postId,
         },
-      },
-      create: {
-        userId: loggedInUser.id,
-        postId: params.postId,
-      },
-      update: {},
-    });
+        update: {},
+      }),
+      ...(loggedInUser.id !== post.userId
+        ? [
+            client.notification.create({
+              data: {
+                issuerId: loggedInUser.id,
+                recipientId: post.userId,
+                postId: params.postId,
+                type: 'LIKE',
+              },
+            }),
+          ]
+        : []),
+    ]);
 
     return new Response();
   } catch (error) {
@@ -92,12 +119,35 @@ export async function DELETE(
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await client.like.deleteMany({
+    const post = await client.post.findUnique({
       where: {
-        userId: loggedInUser.id,
-        postId: params.postId,
+        id: params.postId,
+      },
+      select: {
+        userId: true,
       },
     });
+
+    if (!post) {
+      return Response.json({ error: 'Post not found' }, { status: 404 });
+    }
+
+    await client.$transaction([
+      client.like.deleteMany({
+        where: {
+          userId: loggedInUser.id,
+          postId: params.postId,
+        },
+      }),
+      client.notification.deleteMany({
+        where: {
+          issuerId: loggedInUser.id,
+          recipientId: post.userId,
+          postId: params.postId,
+          type: 'LIKE',
+        },
+      }),
+    ]);
 
     return new Response();
   } catch (error) {

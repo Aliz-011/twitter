@@ -1,15 +1,31 @@
-import { Bell, Bookmark, Home, Mail } from 'lucide-react';
+import { Bookmark, Home, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 
 import { cn } from '@/lib/utils';
+import { NotificationButton } from './notification-button';
+import { validateRequest } from '@/auth';
+import { client } from '@/lib/database';
 
 type Props = {
   className?: string;
 };
 
-export const MenuBar = ({ className }: Props) => {
+export const MenuBar = async ({ className }: Props) => {
+  const { user } = await validateRequest();
+
+  if (!user) {
+    return null;
+  }
+
+  const unreadNotificationsCount = await client.notification.count({
+    where: {
+      recipientId: user.id,
+      isRead: false,
+    },
+  });
+
   return (
     <div className={cn(className)}>
       <Button
@@ -23,17 +39,11 @@ export const MenuBar = ({ className }: Props) => {
           <span className="hidden lg:inline">Home</span>
         </Link>
       </Button>
-      <Button
-        className="flex items-center justify-start gap-3"
-        variant="ghost"
-        title="Notifications"
-        asChild
-      >
-        <Link href="/notifications">
-          <Bell />
-          <span className="hidden lg:inline">Notifications</span>
-        </Link>
-      </Button>
+
+      <NotificationButton
+        initialState={{ unreadCount: unreadNotificationsCount }}
+      />
+
       <Button
         className="flex items-center justify-start gap-3"
         variant="ghost"

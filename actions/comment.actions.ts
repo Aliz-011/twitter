@@ -20,14 +20,28 @@ export const createComment = async ({
 
   const { content: commentValidated } = createCommentSchema.parse({ content });
 
-  const newComment = await client.comment.create({
-    data: {
-      content: commentValidated,
-      postId: post.id,
-      userId: user.id,
-    },
-    include: getCommentDataInclude(user.id),
-  });
+  const [newComment] = await client.$transaction([
+    client.comment.create({
+      data: {
+        content: commentValidated,
+        postId: post.id,
+        userId: user.id,
+      },
+      include: getCommentDataInclude(user.id),
+    }),
+    ...(post.user.id !== user.id
+      ? [
+          client.notification.create({
+            data: {
+              issuerId: user.id,
+              recipientId: post.user.id,
+              postId: post.id,
+              type: 'COMMENT',
+            },
+          }),
+        ]
+      : []),
+  ]);
 
   return newComment;
 };
