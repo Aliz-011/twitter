@@ -51,7 +51,8 @@ export const FollowButton = ({ initialState, userId }: Props) => {
     <Button
       variant={data.isFollowedByUser ? 'secondary' : 'default'}
       onClick={() => mutation.mutate()}
-      className="rounded-full"
+      className="rounded-full font-bold"
+      size="sm"
     >
       {data.isFollowedByUser ? 'Unfollow' : 'Follow'}
     </Button>

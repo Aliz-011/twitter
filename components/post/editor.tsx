@@ -114,7 +114,9 @@ const Editor = () => {
         <Button
           onClick={onSubmit}
           disabled={!input.trim() || mutation.isPending || isUploading}
-          className="min-w-20"
+          className="min-w-20 rounded-full font-bold"
+          size="sm"
+          variant="primary"
         >
           Post
         </Button>

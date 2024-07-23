@@ -30,3 +30,9 @@ export const updateUserSchema = z.object({
 });
 
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
+
+export const createCommentSchema = z.object({
+  content: z.string().trim().min(1),
+});
+
+export type CommentFormValues = z.infer<typeof createCommentSchema>;

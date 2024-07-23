@@ -1,21 +1,29 @@
+'use client';
+
 import Link from 'next/link';
+import { useState } from 'react';
+import { MessagesSquare } from 'lucide-react';
 
 import { UserAvatar } from '@/components/user-avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Linkify } from '@/components/linkify';
+import { Comments } from '@/components/comments';
 import { UserTooltip } from '@/components/user-tooltip';
 import { MoreButton } from './more-button';
+import { MediaPreview } from './media-preview';
+import { LikeButton } from './like-button';
+import { BookmarkButton } from './bookmark-button';
 
 import { PostData } from '@/types';
 import { cn, formatRelativeDate } from '@/lib/utils';
 import { useSession } from '@/hooks/use-session';
-import { MediaPreview } from './media-preview';
 
 type Props = {
   post: PostData;
 };
 
 export const Post = ({ post }: Props) => {
+  const [showComments, setShowComments] = useState(false);
   const { user } = useSession();
 
   return (
@@ -42,7 +50,7 @@ export const Post = ({ post }: Props) => {
             </UserTooltip>
 
             <Link
-              href={`/posts/${post.id}`}
+              href={`/${post.user.username}/status/${post.id}`}
               className="text-sm block text-muted-foreground hover:underline"
             >
               {formatRelativeDate(post.createdAt)}
@@ -71,6 +79,38 @@ export const Post = ({ post }: Props) => {
             <MediaPreview key={att.id} media={att} />
           ))}
       </div>
+      <hr className="text-muted-foreground" />
+      <div className="flex justify-between gap-5">
+        <div className="flex items-center gap-5">
+          <button
+            className="flex items-center gap-2"
+            onClick={() => setShowComments((prev) => !prev)}
+          >
+            <MessagesSquare className="size-5" />
+            <span className="text-sm font-medium tabular-nums">
+              {post._count.comments}{' '}
+              <span className="hidden sm:inline">comments</span>
+            </span>
+          </button>
+
+          <LikeButton
+            postId={post.id}
+            initialState={{
+              likes: post._count.likes,
+              isLikedByUser: post.likes.some((p) => p.userId === user.id),
+            }}
+          />
+        </div>
+        <BookmarkButton
+          postId={post.id}
+          initialState={{
+            isBookmarkedByUser: post.bookmarks.some(
+              (bookmark) => bookmark.userId === user.id
+            ),
+          }}
+        />
+      </div>
+      {showComments && <Comments post={post} />}
     </article>
   );
 };

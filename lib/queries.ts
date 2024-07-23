@@ -1,7 +1,7 @@
 import { unstable_cache } from 'next/cache';
 import { client } from './database';
 import { cache } from 'react';
-import { getUserDataSelect } from '@/types';
+import { getPostDataInclude, getUserDataSelect } from '@/types';
 import { notFound } from 'next/navigation';
 
 export const getTrendingTropics = unstable_cache(
@@ -44,3 +44,18 @@ export const getUser = cache(
     return user;
   }
 );
+
+export const getPost = cache(async (postId: string, loggedInUserId: string) => {
+  const post = await client.post.findUnique({
+    where: {
+      id: postId,
+    },
+    include: getPostDataInclude(loggedInUserId),
+  });
+
+  if (!post) {
+    notFound();
+  }
+
+  return post;
+});

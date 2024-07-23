@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation';
 
-import { validateRequest } from '@/auth';
-import { SessionProvider } from '@/providers/session-provider';
 import { Navbar } from './navbar';
 import { MenuBar } from './menu-bar';
+
+import { validateRequest } from '@/auth';
+import { SessionProvider } from '@/providers/session-provider';
 
 const MainLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await validateRequest();

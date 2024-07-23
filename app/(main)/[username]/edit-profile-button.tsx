@@ -15,9 +15,9 @@ export const EditProfileButton = ({ user }: Props) => {
   return (
     <>
       <Button
-        variant="outline"
+        variant="primary"
         onClick={() => setShowDialog((prev) => !prev)}
-        className="rounded-full"
+        className="rounded-full font-bold"
         size="sm"
       >
         Edit Profile

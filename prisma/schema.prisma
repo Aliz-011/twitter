@@ -15,20 +15,26 @@ datasource db {
 }
 
 model User {
-  id          String    @id
-  username    String    @unique
-  displayName String
-  email       String?   @unique
-  password    String?
-  googleId    String?   @unique
-  avatarUrl   String?
-  bio         String?
-  sessions    Session[]
-  posts       Post[]
-  followers   Follow[]  @relation("Followers")
-  following   Follow[]  @relation("Following")
+  id                    String         @id
+  username              String         @unique
+  displayName           String
+  email                 String?        @unique
+  password              String?
+  googleId              String?        @unique
+  avatarUrl             String?
+  bio                   String?
+  sessions              Session[]
+  posts                 Post[]
+  followers             Follow[]       @relation("Followers")
+  following             Follow[]       @relation("Following")
+  likes                 Like[]
+  bookmarks             Bookmark[]
+  comments              Comment[]
+  receivedNotifications Notification[] @relation("Recipient")
+  issuedNotifications   Notification[] @relation("Issuer")
 
-  createdAt DateTime @default(now())
+  createdAt    DateTime       @default(now())
+  Notification Notification[]
 
   @@map("users")
 }
@@ -54,11 +60,15 @@ model Follow {
 }
 
 model Post {
-  id          String  @id @default(cuid())
-  content     String
-  userId      String
-  user        User    @relation(references: [id], fields: [userId], onDelete: Cascade)
-  attachments Media[]
+  id                  String         @id @default(cuid())
+  content             String
+  userId              String
+  user                User           @relation(references: [id], fields: [userId], onDelete: Cascade)
+  attachments         Media[]
+  likes               Like[]
+  bookmarks           Bookmark[]
+  comments            Comment[]
+  linkedNotifications Notification[]
 
   createdAt DateTime @default(now())
 
@@ -80,4 +90,64 @@ model Media {
 enum MediaType {
   IMAGE
   VIDEO
+}
+
+model Comment {
+  id      String @id @default(cuid())
+  content String
+  userId  String
+  user    User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+  postId  String
+  post    Post   @relation(references: [id], fields: [postId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("comments")
+}
+
+model Like {
+  userId String
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+  postId String
+  post   Post   @relation(references: [id], fields: [postId], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("likes")
+}
+
+model Bookmark {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+  postId String
+  post   Post   @relation(references: [id], fields: [postId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@map("bookmarks")
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  recipientId String
+  recipient   User             @relation("Recipient", references: [id], fields: [recipientId], onDelete: Cascade)
+  issuerId    String
+  issuer      User             @relation("Issuer", references: [id], fields: [issuerId], onDelete: Cascade)
+  postId      String?
+  post        Post?            @relation(references: [id], fields: [postId], onDelete: Cascade)
+  type        NotificationType
+  isRead      Boolean          @default(false)
+
+  createdAt DateTime @default(now())
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  LIKE
+  FOLLOW
+  COMMENT
 }

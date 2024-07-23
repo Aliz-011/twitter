@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Check, LogOut, MonitorCog, Moon, Sun, UserIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useQueryClient } from '@tanstack/react-query';
 
 import {
   DropdownMenu,
@@ -20,7 +21,6 @@ import { UserAvatar } from '@/components/user-avatar';
 import { useSession } from '@/hooks/use-session';
 import { cn } from '@/lib/utils';
 import { logout } from '@/actions/user.actions';
-import { useQueryClient } from '@tanstack/react-query';
 
 type Props = {
   className?: string;

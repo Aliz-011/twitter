@@ -11,14 +11,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 
-import { PostData } from '@/types';
-import { DeletePostDialog } from './delete-post-dialog';
+import { CommentData } from '@/types';
+import { DeleteCommentDialog } from './delete-comment-dialog';
 
 export const MoreButton = ({
-  post,
+  comment,
   className,
 }: {
-  post: PostData;
+  comment: CommentData;
   className?: string;
 }) => {
   const [showDialog, setShowDialog] = useState(false);
@@ -40,8 +40,8 @@ export const MoreButton = ({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <DeletePostDialog
-        post={post}
+      <DeleteCommentDialog
+        comment={comment}
         onClose={() => setShowDialog((prev) => !prev)}
         open={showDialog}
       />
