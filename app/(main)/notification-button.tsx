@@ -22,6 +22,7 @@ export const NotificationButton = ({ initialState }: Props) => {
     initialData: initialState,
     refetchInterval: 60 * 1000,
   });
+
   return (
     <Button
       className="flex items-center justify-start gap-3"

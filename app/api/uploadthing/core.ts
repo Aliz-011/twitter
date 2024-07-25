@@ -1,5 +1,6 @@
 import { validateRequest } from '@/auth';
 import { client } from '@/lib/database';
+import streamServerClient from '@/lib/stream';
 import { createUploadthing, type FileRouter } from 'uploadthing/next';
 import { UploadThingError, UTApi } from 'uploadthing/server';
 
@@ -34,17 +35,27 @@ export const ourFileRouter = {
         '/f/',
         `/a/${process.env.NEXT_PUBLIC_UPLOADTHING_APP_ID}/`
       );
+
+      await Promise.all([
+        client.user.update({
+          where: {
+            id: metadata.user.id,
+          },
+          data: {
+            avatarUrl: newAvatarUrl,
+          },
+        }),
+
+        streamServerClient.partialUpdateUser({
+          id: metadata.user.id,
+          set: {
+            image: newAvatarUrl,
+          },
+        }),
+      ]);
+
       // This code RUNS ON YOUR SERVER after upload
       console.log('Upload complete for user:', metadata.user.username);
-
-      await client.user.update({
-        where: {
-          id: metadata.user.id,
-        },
-        data: {
-          avatarUrl: newAvatarUrl,
-        },
-      });
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
       return { uploadedBy: metadata.user.username, avatarUrl: newAvatarUrl };

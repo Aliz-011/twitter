@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 import { NotificationButton } from './notification-button';
 import { validateRequest } from '@/auth';
 import { client } from '@/lib/database';
+import { MessagesButton } from './messages-button';
+import streamServerClient from '@/lib/stream';
 
 type Props = {
   className?: string;
@@ -19,12 +21,16 @@ export const MenuBar = async ({ className }: Props) => {
     return null;
   }
 
-  const unreadNotificationsCount = await client.notification.count({
-    where: {
-      recipientId: user.id,
-      isRead: false,
-    },
-  });
+  const [unreadNotificationsCount, unreadMessagesCount] = await Promise.all([
+    client.notification.count({
+      where: {
+        recipientId: user.id,
+        isRead: false,
+      },
+    }),
+
+    (await streamServerClient.getUnreadCount(user.id)).total_unread_count,
+  ]);
 
   return (
     <div className={cn(className)}>
@@ -44,17 +50,8 @@ export const MenuBar = async ({ className }: Props) => {
         initialState={{ unreadCount: unreadNotificationsCount }}
       />
 
-      <Button
-        className="flex items-center justify-start gap-3"
-        variant="ghost"
-        title="Messages"
-        asChild
-      >
-        <Link href="/messages">
-          <Mail />
-          <span className="hidden lg:inline">Messages</span>
-        </Link>
-      </Button>
+      <MessagesButton initialState={{ unreadCount: unreadMessagesCount }} />
+
       <Button
         className="flex items-center justify-start gap-3"
         variant="ghost"

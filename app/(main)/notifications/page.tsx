@@ -1,6 +1,10 @@
 import { TrendsSidebar } from '@/components/trends-sidebar';
 import { Notifications } from './notifications';
 
+export const metadata = {
+  title: 'Notifications',
+};
+
 const NotificationsPage = async () => {
   return (
     <main className="w-full min-w-0 flex gap-5">

@@ -6,7 +6,7 @@ export const UserAvatar = ({
   sizes = '20',
   className,
 }: {
-  avatarUrl: string | null;
+  avatarUrl?: string | null;
   className?: string;
   sizes?: string;
 }) => {

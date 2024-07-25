@@ -132,3 +132,7 @@ export type BookmarkInfo = {
 export type NotificationCount = {
   unreadCount: number;
 };
+
+export type MessageCount = {
+  unreadCount: number;
+};

@@ -17,6 +17,7 @@ import {
 } from '@/lib/validation';
 import { lucia, validateRequest } from '../auth';
 import { getUserDataSelect } from '@/types';
+import streamServerClient from '@/lib/stream';
 
 export const register = async (credentials: RegisterFormValues) => {
   try {
@@ -38,8 +39,11 @@ export const register = async (credentials: RegisterFormValues) => {
       parallelism: 1,
     });
     console.log(hashed);
+
     const userId = generateIdFromEntropySize(10);
+
     console.log(userId);
+
     const existingUsername = await client.user.findFirst({
       where: {
         username: {
@@ -70,14 +74,22 @@ export const register = async (credentials: RegisterFormValues) => {
       };
     }
 
-    await client.user.create({
-      data: {
+    await client.$transaction(async (tx) => {
+      await tx.user.create({
+        data: {
+          id: userId,
+          username,
+          displayName: username,
+          email,
+          password: hashed,
+        },
+      });
+
+      await streamServerClient.upsertUser({
         id: userId,
         username,
-        displayName: username,
-        email,
-        password: hashed,
-      },
+        name: username,
+      });
     });
 
     const session = await lucia.createSession(userId, {});
@@ -198,15 +210,26 @@ export const updateUser = async (values: UpdateUserFormValues) => {
     throw new Error('Unauthorized');
   }
 
-  const updateUser = await client.user.update({
-    where: {
+  const updatedUser = await client.$transaction(async (tx) => {
+    const updatedUser = await tx.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        ...body,
+      },
+      select: getUserDataSelect(user.id),
+    });
+
+    await streamServerClient.partialUpdateUser({
       id: user.id,
-    },
-    data: {
-      ...body,
-    },
-    select: getUserDataSelect(user.id),
+      set: {
+        name: updatedUser.displayName,
+      },
+    });
+
+    return updatedUser;
   });
 
-  return updateUser;
+  return updatedUser;
 };
