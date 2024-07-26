@@ -17,7 +17,7 @@ type Props = {
 export const Comment = ({ comment }: Props) => {
   const { user } = useSession();
   return (
-    <div className="flex gap-3 py-3 justify-between group/comment">
+    <div className="flex gap-3 justify-between group/comment">
       <div className="flex gap-3 py-3">
         <div className="hidden sm:inline">
           <UserTooltip user={comment.user}>
